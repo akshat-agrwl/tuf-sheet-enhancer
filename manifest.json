@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "TUF SDE Sheet — Pattern Column",
+  "version": "1.0.0",
+  "description": "Adds a Pattern column to Striver's SDE Sheet on takeuforward.org. Click a pattern tag to filter problems.",
+  "content_scripts": [
+    {
+      "matches": ["https://takeuforward.org/*"],
+      "js": ["data.js", "content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

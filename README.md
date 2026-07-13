@@ -5,7 +5,7 @@ on takeuforward.org with **pattern tags and company tags for all 191 problems** 
 you can see, at a glance, which technique each problem's optimal solution uses, which
 companies ask it, and drill problems by pattern instead of by sheet order.
 
-![Pattern and Companies columns on the sheet](docs/screenshot.png)
+![Pattern and Companies columns, toolbar filters, and an expanded company list](docs/screenshot.png)
 
 ## Features
 

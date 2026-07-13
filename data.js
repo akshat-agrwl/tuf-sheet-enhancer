@@ -1,4 +1,4 @@
-// TUF SDE Sheet — Pattern Column: dataset
+// TUF SDE Sheet Enhancer: dataset
 //
 // Pattern categorization for all 191 problems of Striver's SDE Sheet.
 // Keys are the problem title lowercased with all non-alphanumerics stripped

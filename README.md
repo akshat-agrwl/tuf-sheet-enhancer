@@ -1,4 +1,4 @@
-# TUF SDE Sheet — Pattern Column
+# TUF SDE Sheet Enhancer
 
 A Chrome extension that upgrades [Striver's SDE Sheet](https://takeuforward.org/dsa/strivers-sde-sheet-top-coding-interview-problems)
 on takeuforward.org with **pattern tags and company tags for all 191 problems** — so

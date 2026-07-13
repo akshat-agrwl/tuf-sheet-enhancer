@@ -1,4 +1,4 @@
-// TUF SDE Sheet — Pattern Column
+// TUF SDE Sheet Enhancer
 // - Injects "Pattern" + "Companies" + "Solution" columns into the problem tables
 // - Hides the "Plus" and "Resource Plus" columns
 // - Adds a nested "Pattern" dropdown (DS/algo family → pattern) and a flat

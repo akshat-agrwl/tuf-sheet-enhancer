@@ -1,5 +1,5 @@
 // TUF SDE Sheet — Pattern Column
-// - Injects "Pattern" + "Solution" columns into the problem tables
+// - Injects "Pattern" + "Companies" + "Solution" columns into the problem tables
 // - Hides the "Plus" and "Resource Plus" columns
 // - Adds a nested "Pattern" dropdown (DS/algo family → pattern) to the toolbar
 // - Selecting a pattern auto-expands all sections, shows only matching
@@ -7,7 +7,8 @@
 // - The Solution icon opens a modal with the optimal approach (like Notes).
 //
 // The problem dataset (TUF_DATA / TUF_ALIASES / TUF_FAMILY_ORDER) lives in
-// data.js, which the manifest loads before this file.
+// data.js and the company tags (TUF_COMPANIES) in companies.js, both loaded
+// by the manifest before this file.
 
 (() => {
   "use strict";
@@ -32,6 +33,11 @@
   const dataForTitle = (title) => {
     const k = norm(title);
     return TUF_DATA[k] || TUF_DATA[TUF_ALIASES[k]] || null;
+  };
+  const companiesForTitle = (title) => {
+    if (typeof TUF_COMPANIES === "undefined") return null;
+    const k = norm(title);
+    return TUF_COMPANIES[k] || TUF_COMPANIES[TUF_ALIASES[k]] || null;
   };
 
   function isSheetTable(table) {
@@ -152,6 +158,14 @@
     return s;
   }
 
+  // Company chip (informational, not clickable).
+  function makeCompanyChip(name) {
+    const s = document.createElement("span");
+    s.className = "tufp-co";
+    s.textContent = name;
+    return s;
+  }
+
   // ---------- solution modal (opens like Notes) ----------
 
   function openSolutionModal(title, info, editorialHref) {
@@ -193,6 +207,20 @@
     time.textContent = "Time: " + info.time;
 
     modal.append(head, tagWrap, how, time);
+
+    const companies = companiesForTitle(title);
+    if (companies && companies.length) {
+      const cos = document.createElement("div");
+      cos.className = "tufp-modal-cos";
+      const label = document.createElement("div");
+      label.className = "tufp-modal-cos-label";
+      label.textContent = "Asked at";
+      const chips = document.createElement("div");
+      chips.className = "tufp-tags";
+      companies.forEach((c) => chips.appendChild(makeCompanyChip(c)));
+      cos.append(label, chips);
+      modal.appendChild(cos);
+    }
 
     if (editorialHref) {
       const a = document.createElement("a");
@@ -245,7 +273,7 @@
 
     if (!headRow.querySelector(".tufp-head")) {
       const ref = headRow.lastElementChild;
-      for (const label of ["Pattern", "Solution"]) {
+      for (const label of ["Pattern", "Companies", "Solution"]) {
         const th = document.createElement("th");
         th.className = (ref ? ref.className + " " : "") + "tufp-head";
         th.textContent = label;
@@ -274,6 +302,26 @@
         tdP.innerHTML = '<span class="tufp-none">—</span>';
       }
       row.appendChild(tdP);
+
+      // Companies cell: top 3 chips + a "+N" chip carrying the rest in its tooltip
+      const tdC = document.createElement("td");
+      tdC.className = "tufp-cell tufp-co-cell";
+      const companies = companiesForTitle(title);
+      if (companies && companies.length) {
+        const wrap = document.createElement("div");
+        wrap.className = "tufp-tags";
+        companies.slice(0, 3).forEach((c) => wrap.appendChild(makeCompanyChip(c)));
+        if (companies.length > 3) {
+          const more = makeCompanyChip("+" + (companies.length - 3));
+          more.classList.add("tufp-co-more");
+          more.title = companies.slice(3).join(", ");
+          wrap.appendChild(more);
+        }
+        tdC.appendChild(wrap);
+      } else {
+        tdC.innerHTML = '<span class="tufp-none">—</span>';
+      }
+      row.appendChild(tdC);
 
       // Solution cell
       const tdS = document.createElement("td");

@@ -54,6 +54,27 @@
   color: #fff;
 }
 
+.tufp-co-cell {
+  min-width: 130px;
+  max-width: 220px;
+}
+
+.tufp-co {
+  font-size: 10.5px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--surface-2, rgba(128, 128, 128, 0.12));
+  color: var(--base-text-secondary, var(--base-text-primary, inherit));
+  white-space: nowrap;
+}
+
+.tufp-co-more {
+  border: 1px dashed var(--surface-border-muted, #d1d5db);
+  background: none;
+  cursor: help;
+}
+
 .tufp-none {
   color: var(--base-text-secondary, #9ca3af);
   opacity: 0.5;
@@ -256,6 +277,20 @@
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   color: var(--brand, #d41f30);
+}
+
+.tufp-modal-cos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tufp-modal-cos-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--base-text-secondary, #6b7280);
 }
 
 .tufp-modal-link {

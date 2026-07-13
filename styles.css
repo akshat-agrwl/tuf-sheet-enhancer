@@ -75,6 +75,24 @@
   cursor: help;
 }
 
+.tufp-co-btn {
+  font-family: inherit;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.tufp-co-btn:hover {
+  border-color: var(--brand, #d41f30);
+  color: var(--brand, #d41f30);
+}
+
+.tufp-co-btn.tufp-co-on {
+  background: var(--brand, #d41f30);
+  border-color: var(--brand, #d41f30);
+  color: #fff;
+}
+
 .tufp-none {
   color: var(--base-text-secondary, #9ca3af);
   opacity: 0.5;

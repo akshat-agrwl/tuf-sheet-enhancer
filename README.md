@@ -16,13 +16,16 @@ companies ask it, and drill problems by pattern instead of by sheet order.
   stay visible, and sections with no matches are hidden entirely. Selecting a second
   tag narrows to problems that use *both*. Clearing the filter re-collapses the
   sections that were auto-expanded, leaving the sheet as you left it.
-- **Nested Pattern dropdown in the toolbar** — styled like the site's own Difficulty
-  dropdown. Pick a DS/algo family first (Arrays, Graphs, DP, …), then the pattern
-  inside it; each pattern shows how many problems use it. The button shows the active
-  count, e.g. `Pattern (2)`.
+- **Pattern & Company dropdowns in the toolbar** — styled like the site's own
+  Difficulty dropdown. Pattern is nested: pick a DS/algo family first (Arrays,
+  Graphs, DP, …), then the pattern inside it. Company is a flat list sorted by how
+  many problems each company asks. Every entry shows its problem count, and each
+  button shows its active count, e.g. `Pattern (2)`.
 - **Companies column** — the top companies that ask each problem, as chips (top 3
-  visible; hover the `+N` chip for the rest). The solution modal lists all of them
-  under "Asked at".
+  visible; hover the `+N` chip for the rest). Chips are clickable filters, just like
+  pattern tags — "show me everything Google asks" is one click — and pattern +
+  company filters combine, e.g. Sliding Window problems asked at Google. The solution
+  modal lists all companies under "Asked at".
 - **Solution column** — a lightbulb per problem opens a modal (like the site's Note
   popup) with the pattern tags, a one-line description of the optimal approach, the
   time complexity, the companies that ask it, and a link to the problem's free

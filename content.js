@@ -1,9 +1,11 @@
 // TUF SDE Sheet — Pattern Column
 // - Injects "Pattern" + "Companies" + "Solution" columns into the problem tables
 // - Hides the "Plus" and "Resource Plus" columns
-// - Adds a nested "Pattern" dropdown (DS/algo family → pattern) to the toolbar
-// - Selecting a pattern auto-expands all sections, shows only matching
-//   problems, and hides sections with no matches; clearing restores them.
+// - Adds a nested "Pattern" dropdown (DS/algo family → pattern) and a flat
+//   "Company" dropdown (sorted by problem count) to the toolbar
+// - Selecting a pattern or company auto-expands all sections, shows only
+//   matching problems, and hides sections with no matches; clearing restores
+//   them. Pattern and company filters combine (AND).
 // - The Solution icon opens a modal with the optimal approach (like Notes).
 //
 // The problem dataset (TUF_DATA / TUF_ALIASES / TUF_FAMILY_ORDER) lives in
@@ -25,9 +27,22 @@
     else CATEGORIES[f] = [...CATEGORIES[f]].sort();
   });
 
+  // Company filter: companies of all problems, most-asked first.
+  const CO_COUNTS = {};
+  if (typeof TUF_COMPANIES !== "undefined") {
+    Object.values(TUF_COMPANIES).forEach((list) =>
+      list.forEach((c) => { CO_COUNTS[c] = (CO_COUNTS[c] || 0) + 1; })
+    );
+  }
+  const CO_ORDER = Object.keys(CO_COUNTS).sort(
+    (a, b) => CO_COUNTS[b] - CO_COUNTS[a] || a.localeCompare(b)
+  );
+
   const activeTags = new Set();
+  const activeCos = new Set();
   const autoExpanded = new Set(); // section titles we expanded for a filter
   const openCats = new Set(Object.keys(CATEGORIES).length === 1 ? Object.keys(CATEGORIES) : []);
+  const filterCount = () => activeTags.size + activeCos.size;
 
   const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   const dataForTitle = (title) => {
@@ -77,7 +92,7 @@
 
   // While filtering, hide whole sections that have no matching problems.
   function updateSectionVisibility() {
-    const filtering = activeTags.size > 0;
+    const filtering = filterCount() > 0;
     document.querySelectorAll('[data-slot="accordion-item"]').forEach((item) => {
       if (!filtering) {
         item.classList.remove("tufp-sec-hidden");
@@ -92,45 +107,77 @@
 
   // ---------- shared filter logic ----------
 
-  function toggleTag(tag) {
-    const wasEmpty = activeTags.size === 0;
-    if (activeTags.has(tag)) activeTags.delete(tag);
-    else activeTags.add(tag);
-    if (wasEmpty && activeTags.size) expandAllSections();
-    if (!activeTags.size) restoreSections();
+  function afterFilterChange(wasActive) {
+    if (!wasActive && filterCount()) expandAllSections();
+    if (!filterCount()) restoreSections();
     refreshTagStates();
     applyFilter();
   }
 
+  function toggleTag(tag) {
+    const wasActive = filterCount() > 0;
+    if (activeTags.has(tag)) activeTags.delete(tag);
+    else activeTags.add(tag);
+    afterFilterChange(wasActive);
+  }
+
+  function toggleCo(name) {
+    const wasActive = filterCount() > 0;
+    if (activeCos.has(name)) activeCos.delete(name);
+    else activeCos.add(name);
+    afterFilterChange(wasActive);
+  }
+
   function clearTags() {
     activeTags.clear();
-    restoreSections();
-    refreshTagStates();
-    applyFilter();
+    afterFilterChange(true);
+  }
+
+  function clearCos() {
+    activeCos.clear();
+    afterFilterChange(true);
+  }
+
+  function clearAllFilters() {
+    activeTags.clear();
+    activeCos.clear();
+    afterFilterChange(true);
   }
 
   function refreshTagStates() {
     document.querySelectorAll(".tufp-tag").forEach((b) => {
       b.classList.toggle("tufp-on", activeTags.has(b.textContent));
     });
+    document.querySelectorAll(".tufp-co-btn").forEach((b) => {
+      b.classList.toggle("tufp-co-on", activeCos.has(b.textContent));
+    });
     renderDropdownList();
-    const label = document.querySelector(".tufp-dd-label");
+    renderCompanyList();
+    const label = document.querySelector(".tufp-dd-pattern .tufp-dd-label");
     if (label) {
       label.textContent = activeTags.size ? `Pattern (${activeTags.size})` : "Pattern";
+    }
+    const coLabel = document.querySelector(".tufp-dd-company .tufp-dd-label");
+    if (coLabel) {
+      coLabel.textContent = activeCos.size ? `Company (${activeCos.size})` : "Company";
     }
   }
 
   function applyFilter() {
-    const active = [...activeTags];
+    const tags = [...activeTags];
+    const cos = [...activeCos];
     document.querySelectorAll("table").forEach((table) => {
       if (!isSheetTable(table)) return;
       for (const row of table.tBodies[0] ? table.tBodies[0].rows : []) {
-        if (!active.length) {
+        if (!tags.length && !cos.length) {
           row.classList.remove("tufp-row-hidden");
           continue;
         }
-        const tags = (row.dataset.tufpTags || "").split("|");
-        row.classList.toggle("tufp-row-hidden", !active.every((t) => tags.includes(t)));
+        const rowTags = (row.dataset.tufpTags || "").split("|");
+        const rowCos = (row.dataset.tufpCos || "").split("|");
+        const match =
+          tags.every((t) => rowTags.includes(t)) && cos.every((c) => rowCos.includes(c));
+        row.classList.toggle("tufp-row-hidden", !match);
       }
     });
     updateSectionVisibility();
@@ -158,12 +205,26 @@
     return s;
   }
 
-  // Company chip (informational, not clickable).
+  // Company chip (informational, not clickable — used in the solution modal).
   function makeCompanyChip(name) {
     const s = document.createElement("span");
     s.className = "tufp-co";
     s.textContent = name;
     return s;
+  }
+
+  // Clickable company chip (used in the table; filters like pattern tags).
+  function makeCompanyTag(name) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tufp-co tufp-co-btn" + (activeCos.has(name) ? " tufp-co-on" : "");
+    b.textContent = name;
+    b.title = "Filter by " + name;
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleCo(name);
+    });
+    return b;
   }
 
   // ---------- solution modal (opens like Notes) ----------
@@ -308,9 +369,10 @@
       tdC.className = "tufp-cell tufp-co-cell";
       const companies = companiesForTitle(title);
       if (companies && companies.length) {
+        row.dataset.tufpCos = companies.join("|");
         const wrap = document.createElement("div");
         wrap.className = "tufp-tags";
-        companies.slice(0, 3).forEach((c) => wrap.appendChild(makeCompanyChip(c)));
+        companies.slice(0, 3).forEach((c) => wrap.appendChild(makeCompanyTag(c)));
         if (companies.length > 3) {
           const more = makeCompanyChip("+" + (companies.length - 3));
           more.classList.add("tufp-co-more");
@@ -347,10 +409,10 @@
     }
   }
 
-  // ---------- toolbar dropdown (nested: category → pattern) ----------
+  // ---------- toolbar dropdowns (Pattern: category → pattern; Company: flat) ----------
 
   function renderDropdownList() {
-    const list = document.querySelector(".tufp-dd-list");
+    const list = document.querySelector(".tufp-dd-pattern .tufp-dd-list");
     if (!list) return;
     list.replaceChildren();
 
@@ -411,20 +473,53 @@
     }
   }
 
-  function injectDropdown() {
-    if (document.querySelector(".tufp-dd")) return;
-    const buttons = [...document.querySelectorAll("button")];
-    const diffBtn = buttons.find((b) => b.textContent.trim() === "Difficulty");
-    if (!diffBtn || !diffBtn.parentElement) return;
+  function renderCompanyList() {
+    const list = document.querySelector(".tufp-dd-company .tufp-dd-list");
+    if (!list) return;
+    list.replaceChildren();
 
+    CO_ORDER.forEach((name) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "tufp-dd-item" + (activeCos.has(name) ? " tufp-dd-item-on" : "");
+      const check = document.createElement("span");
+      check.className = "tufp-dd-check";
+      check.textContent = activeCos.has(name) ? "✓" : "";
+      const coName = document.createElement("span");
+      coName.textContent = name;
+      const count = document.createElement("span");
+      count.className = "tufp-dd-count";
+      count.textContent = CO_COUNTS[name];
+      item.append(check, coName, count);
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleCo(name);
+      });
+      list.appendChild(item);
+    });
+
+    if (activeCos.size) {
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.className = "tufp-dd-item tufp-dd-clear";
+      clear.textContent = "Clear all";
+      clear.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clearCos();
+      });
+      list.appendChild(clear);
+    }
+  }
+
+  function buildDropdown(kindClass, labelText, refClassName, renderList) {
     const wrap = document.createElement("div");
-    wrap.className = "tufp-dd";
+    wrap.className = "tufp-dd " + kindClass;
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = diffBtn.className; // mirror the site's dropdown styling
+    btn.className = refClassName; // mirror the site's dropdown styling
     btn.innerHTML =
-      '<span class="tufp-dd-label">Pattern</span>' +
+      '<span class="tufp-dd-label">' + labelText + "</span>" +
       '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 
     const panel = document.createElement("div");
@@ -435,15 +530,37 @@
 
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
+      document.querySelectorAll(".tufp-dd-panel.tufp-dd-open").forEach((p) => {
+        if (p !== panel) p.classList.remove("tufp-dd-open");
+      });
       panel.classList.toggle("tufp-dd-open");
-      renderDropdownList();
+      renderList();
     });
     document.addEventListener("click", (e) => {
       if (!wrap.contains(e.target)) panel.classList.remove("tufp-dd-open");
     });
 
     wrap.append(btn, panel);
-    diffBtn.insertAdjacentElement("afterend", wrap);
+    return wrap;
+  }
+
+  function injectDropdown() {
+    if (document.querySelector(".tufp-dd")) return;
+    const buttons = [...document.querySelectorAll("button")];
+    const diffBtn = buttons.find((b) => b.textContent.trim() === "Difficulty");
+    if (!diffBtn || !diffBtn.parentElement) return;
+
+    // insertion order after Difficulty: Pattern, then Company
+    if (CO_ORDER.length) {
+      diffBtn.insertAdjacentElement(
+        "afterend",
+        buildDropdown("tufp-dd-company", "Company", diffBtn.className, renderCompanyList)
+      );
+    }
+    diffBtn.insertAdjacentElement(
+      "afterend",
+      buildDropdown("tufp-dd-pattern", "Pattern", diffBtn.className, renderDropdownList)
+    );
     refreshTagStates();
   }
 
@@ -451,7 +568,7 @@
 
   function renderBar() {
     let bar = document.querySelector(".tufp-bar");
-    if (!activeTags.size) {
+    if (!filterCount()) {
       if (bar) bar.remove();
       return;
     }
@@ -460,11 +577,14 @@
       bar.className = "tufp-bar";
       document.body.appendChild(bar);
     }
-    bar.textContent = "Pattern: " + [...activeTags].join(" + ");
+    const parts = [];
+    if (activeTags.size) parts.push("Pattern: " + [...activeTags].join(" + "));
+    if (activeCos.size) parts.push("Company: " + [...activeCos].join(" + "));
+    bar.textContent = parts.join(" · ");
     const clear = document.createElement("button");
     clear.type = "button";
     clear.textContent = "clear";
-    clear.addEventListener("click", clearTags);
+    clear.addEventListener("click", clearAllFilters);
     bar.appendChild(clear);
   }
 
@@ -473,7 +593,7 @@
   function enhanceAll() {
     document.querySelectorAll("table").forEach(enhanceTable);
     injectDropdown();
-    if (activeTags.size) applyFilter();
+    if (filterCount()) applyFilter();
   }
 
   let scheduled = false;

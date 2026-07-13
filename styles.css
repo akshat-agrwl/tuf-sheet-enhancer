@@ -59,6 +59,12 @@
   max-width: 220px;
 }
 
+/* Widen the column while a row's full company list is expanded. */
+.tufp-co-cell.tufp-co-expanded {
+  min-width: 300px;
+  max-width: 440px;
+}
+
 .tufp-co {
   font-size: 10.5px;
   line-height: 1;

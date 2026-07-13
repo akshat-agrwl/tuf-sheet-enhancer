@@ -220,12 +220,13 @@
   }
 
   // Companies cell content: top 3 chips + a "+N" toggle that expands/collapses
-  // the full list in place.
-  function buildCompanyChips(companies) {
+  // the full list in place (widening the cell while expanded).
+  function buildCompanyChips(companies, cell) {
     const wrap = document.createElement("div");
     wrap.className = "tufp-tags";
     let expanded = false;
     const render = () => {
+      cell.classList.toggle("tufp-co-expanded", expanded);
       wrap.replaceChildren();
       (expanded ? companies : companies.slice(0, 3)).forEach((c) =>
         wrap.appendChild(makeCompanyTag(c))
@@ -377,7 +378,7 @@
       const companies = companiesForTitle(title);
       if (companies && companies.length) {
         row.dataset.tufpCos = companies.join("|");
-        tdC.appendChild(buildCompanyChips(companies));
+        tdC.appendChild(buildCompanyChips(companies, tdC));
       } else {
         tdC.innerHTML = '<span class="tufp-none">—</span>';
       }

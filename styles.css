@@ -70,9 +70,16 @@
 }
 
 .tufp-co-more {
+  font-family: inherit;
   border: 1px dashed var(--surface-border-muted, #d1d5db);
   background: none;
-  cursor: help;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.tufp-co-more:hover {
+  border-color: var(--brand, #d41f30);
+  color: var(--brand, #d41f30);
 }
 
 .tufp-co-btn {
@@ -130,6 +137,13 @@
 .tufp-dd {
   position: relative;
   display: inline-flex;
+}
+
+/* Subtle brand-orange outline so the injected Pattern/Company filters stand out. */
+.tufp-dd > button:first-child {
+  outline: 1px solid rgba(212, 31, 48, 0.4);
+  outline: 1px solid color-mix(in srgb, var(--brand, #d41f30) 40%, transparent);
+  outline-offset: -1px;
 }
 
 .tufp-dd-panel {
@@ -295,20 +309,6 @@
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   color: var(--brand, #d41f30);
-}
-
-.tufp-modal-cos {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tufp-modal-cos-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--base-text-secondary, #6b7280);
 }
 
 .tufp-modal-link {

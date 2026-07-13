@@ -20,16 +20,16 @@ companies ask it, and drill problems by pattern instead of by sheet order.
   Difficulty dropdown. Pattern is nested: pick a DS/algo family first (Arrays,
   Graphs, DP, …), then the pattern inside it. Company is a flat list sorted by how
   many problems each company asks. Every entry shows its problem count, and each
-  button shows its active count, e.g. `Pattern (2)`.
+  button shows its active count, e.g. `Pattern (2)`. Both buttons carry a subtle
+  brand-colored outline so they're easy to spot among the site's own filters.
 - **Companies column** — the top companies that ask each problem, as chips (top 3
-  visible; hover the `+N` chip for the rest). Chips are clickable filters, just like
-  pattern tags — "show me everything Google asks" is one click — and pattern +
-  company filters combine, e.g. Sliding Window problems asked at Google. The solution
-  modal lists all companies under "Asked at".
+  visible; click the `+N` chip to expand the full list in place, `− less` to
+  collapse it). Chips are clickable filters, just like pattern tags — "show me
+  everything Google asks" is one click — and pattern + company filters combine,
+  e.g. Sliding Window problems asked at Google.
 - **Solution column** — a lightbulb per problem opens a modal (like the site's Note
   popup) with the pattern tags, a one-line description of the optimal approach, the
-  time complexity, the companies that ask it, and a link to the problem's free
-  editorial.
+  time complexity, and a link to the problem's free editorial.
 - **Declutters the table** — hides the "Plus" and "Resource Plus" columns (the
   paid-course links).
 

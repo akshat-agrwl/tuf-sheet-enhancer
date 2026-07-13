@@ -205,14 +205,6 @@
     return s;
   }
 
-  // Company chip (informational, not clickable — used in the solution modal).
-  function makeCompanyChip(name) {
-    const s = document.createElement("span");
-    s.className = "tufp-co";
-    s.textContent = name;
-    return s;
-  }
-
   // Clickable company chip (used in the table; filters like pattern tags).
   function makeCompanyTag(name) {
     const b = document.createElement("button");
@@ -225,6 +217,35 @@
       toggleCo(name);
     });
     return b;
+  }
+
+  // Companies cell content: top 3 chips + a "+N" toggle that expands/collapses
+  // the full list in place.
+  function buildCompanyChips(companies) {
+    const wrap = document.createElement("div");
+    wrap.className = "tufp-tags";
+    let expanded = false;
+    const render = () => {
+      wrap.replaceChildren();
+      (expanded ? companies : companies.slice(0, 3)).forEach((c) =>
+        wrap.appendChild(makeCompanyTag(c))
+      );
+      if (companies.length > 3) {
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "tufp-co tufp-co-more";
+        toggle.textContent = expanded ? "− less" : "+" + (companies.length - 3);
+        toggle.title = expanded ? "Show fewer companies" : "Show all companies";
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          expanded = !expanded;
+          render();
+        });
+        wrap.appendChild(toggle);
+      }
+    };
+    render();
+    return wrap;
   }
 
   // ---------- solution modal (opens like Notes) ----------
@@ -268,20 +289,6 @@
     time.textContent = "Time: " + info.time;
 
     modal.append(head, tagWrap, how, time);
-
-    const companies = companiesForTitle(title);
-    if (companies && companies.length) {
-      const cos = document.createElement("div");
-      cos.className = "tufp-modal-cos";
-      const label = document.createElement("div");
-      label.className = "tufp-modal-cos-label";
-      label.textContent = "Asked at";
-      const chips = document.createElement("div");
-      chips.className = "tufp-tags";
-      companies.forEach((c) => chips.appendChild(makeCompanyChip(c)));
-      cos.append(label, chips);
-      modal.appendChild(cos);
-    }
 
     if (editorialHref) {
       const a = document.createElement("a");
@@ -370,16 +377,7 @@
       const companies = companiesForTitle(title);
       if (companies && companies.length) {
         row.dataset.tufpCos = companies.join("|");
-        const wrap = document.createElement("div");
-        wrap.className = "tufp-tags";
-        companies.slice(0, 3).forEach((c) => wrap.appendChild(makeCompanyTag(c)));
-        if (companies.length > 3) {
-          const more = makeCompanyChip("+" + (companies.length - 3));
-          more.classList.add("tufp-co-more");
-          more.title = companies.slice(3).join(", ");
-          wrap.appendChild(more);
-        }
-        tdC.appendChild(wrap);
+        tdC.appendChild(buildCompanyChips(companies));
       } else {
         tdC.innerHTML = '<span class="tufp-none">—</span>';
       }

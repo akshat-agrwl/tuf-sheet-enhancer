@@ -1,4 +1,5 @@
 // Builds lc-index.json: normalized LeetCode title -> companies ranked by frequency.
+// Uses each company's "Six Months" CSV, so tags reflect recent interview reports.
 // Prereq: clone the public company-tags dataset next to this script:
 //   git clone --depth 1 https://github.com/liquidslr/leetcode-company-wise-problems tools/lc-companies
 // Then: node tools/build-index.js
@@ -29,7 +30,7 @@ function parseCsvLine(line) {
 }
 
 for (const company of fs.readdirSync(ROOT)) {
-  const file = path.join(ROOT, company, "5. All.csv");
+  const file = path.join(ROOT, company, "3. Six Months.csv");
   if (!fs.existsSync(file)) continue;
   const lines = fs.readFileSync(file, "utf8").split("\n").slice(1);
   for (const line of lines) {

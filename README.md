@@ -32,8 +32,9 @@ problem's optimal solution uses, which companies ask it, and filter by either.
 - **Patterns** (`data.js`): all 191 problems hand-categorized across 13 DS/algo
   families and 52 pattern tags, by the problem's nature rather than its sheet
   section. Each entry also has a one-line approach and time complexity.
-- **Companies** (`companies.js`): 185 problems tagged, from LeetCode's company
-  tags (via the public [leetcode-company-wise-problems](https://github.com/liquidslr/leetcode-company-wise-problems)
+- **Companies** (`companies.js`): 174 problems tagged, from LeetCode's company
+  tags for the **last six months** of interview reports (via the public
+  [leetcode-company-wise-problems](https://github.com/liquidslr/leetcode-company-wise-problems)
   dataset, mapped problem-by-problem in `tools/tuf-lc-map.js`) plus
   GeeksforGeeks tags for problems not on LeetCode (`tools/gfg-tags.json`).
   Ranked by ask-frequency weighted by company size, capped at 12 per problem.

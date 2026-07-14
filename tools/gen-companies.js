@@ -73,9 +73,10 @@ for (const key of tufKeys) {
   if (companies.length) result[key] = companies;
 }
 
+// A target absent from the index is either a typo or a problem nobody reported
+// within the index's time window — warn, then fall back to GFG tags / untagged.
 if (unknownTargets.length) {
-  console.error("UNKNOWN LC TARGETS:\n" + unknownTargets.join("\n"));
-  process.exit(1);
+  console.warn("targets not in index (skipped):\n  " + unknownTargets.join("\n  "));
 }
 
 const covered = Object.keys(result).length;
